@@ -20,7 +20,11 @@ The goal of this project is to provide a centralized place where developers, cre
 GitHub – Version control and collaboration
 
 📸 Screenshots
-<img width="1861" height="999" alt="image" src="https://github.com/user-attachments/assets/e50da426-f285-4c34-a1a9-340988a715e1" />
+<img width="1857" height="809" alt="Screenshot 2026-03-28 182536" src="https://github.com/user-attachments/assets/27d3eca0-041f-455c-aa22-f0e3ce4b8746" />
+
+<img width="1131" height="842" alt="Screenshot 2026-03-28 182602" src="https://github.com/user-attachments/assets/82ae3c1b-e2c3-4c2c-9642-60cc8f7f17fe" />
+
+
 
 🚀 How To Use
 
