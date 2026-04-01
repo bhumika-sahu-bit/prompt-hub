@@ -48,7 +48,8 @@ Make AI tools more effective for real-world tasks
 
 👨‍💻 Author
 
-Lucky Gole
+Bhumika Sahu 
+
 
 Full Stack Web Developer
 Passionate about building modern web applications and AI tools.
