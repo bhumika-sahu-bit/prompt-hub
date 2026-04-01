@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
 const LoginModal = ({ onClose }) => {
@@ -8,17 +8,28 @@ const LoginModal = ({ onClose }) => {
   const [error, setError] = useState('');
   const { login } = useAuth();
 
+  // 🔥 ESC key close
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [onClose]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!email.endsWith('@gmail.com')) {
       setError('Please use a valid Gmail address');
       return;
     }
+
     setLoading(true);
     try {
       await login(email, name || email.split('@')[0]);
       onClose();
-    } catch (err) {
+    } catch {
       setError('Login failed. Try again.');
     } finally {
       setLoading(false);
@@ -26,141 +37,203 @@ const LoginModal = ({ onClose }) => {
   };
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 10000,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: '1rem', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(20px)'
-    }} onClick={onClose}>
-      <div style={{
-        background: 'rgba(20,20,40,0.98)', 
-        borderRadius: '24px', 
-        padding: '3rem 2.5rem',
-        width: '100%', 
-        maxWidth: '480px', 
-        maxHeight: '90vh',
-        overflowY: 'auto',
-        border: '1px solid rgba(168,85,247,0.4)',
-        boxShadow: '0 25px 60px rgba(0,0,0,0.6)'
-      }} onClick={(e) => e.stopPropagation()}>
-        
-        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-          <h2 style={{
-            fontSize: '2.25rem', 
-            fontWeight: 'bold',
-            background: 'linear-gradient(45deg, #a855f7, #ec4899)', 
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            marginBottom: '0.5rem'
-          }}>
-            Welcome to PromptHub ✨
-          </h2>
-          <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '1.1rem' }}>
-            Sign in with your Gmail to save likes & prompts
-          </p>
+    <div className="modal-overlay" onClick={onClose}>
+      
+      <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+
+        {/* HEADER */}
+        <div className="modal-header">
+          <h2>Welcome to PromptHub</h2>
+          <p>Sign in to save prompts & favorites</p>
         </div>
 
-        {error && (
-          <div style={{
-            background: 'rgba(239,68,68,0.2)', 
-            border: '1px solid rgba(239,68,68,0.5)', 
-            borderRadius: '12px',
-            padding: '1rem 1.25rem', 
-            color: '#f87171', 
-            marginBottom: '1.5rem',
-            textAlign: 'center',
-            fontSize: '0.95rem'
-          }}>
-            {error}
-          </div>
-        )}
+        {/* ERROR */}
+        {error && <div className="error-box">{error}</div>}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          <div>
-            <label style={{ display: 'block', color: 'white', fontWeight: '600', marginBottom: '0.75rem' }}>
-              📧 Gmail Address
-            </label>
+        {/* FORM */}
+        <form onSubmit={handleSubmit} className="form">
+
+          <div className="input-group">
+            <label>Email</label>
             <input
               type="email"
+              placeholder="yourname@gmail.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="yourname@gmail.com"
               required
-              style={{
-                width: '100%', padding: '1.25rem 1.5rem', background: 'rgba(255,255,255,0.08)',
-                border: '2px solid rgba(255,255,255,0.1)', borderRadius: '16px', color: 'white',
-                fontSize: '1.1rem', outline: 'none'
-              }}
             />
           </div>
 
-          <div>
-            <label style={{ display: 'block', color: 'white', fontWeight: '600', marginBottom: '0.75rem' }}>
-              👤 Display Name (Optional)
-            Laksh</label>
+          <div className="input-group">
+            <label>Display Name (optional)</label>
             <input
               type="text"
+              placeholder="Your display name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Your display name"
-              style={{
-                width: '100%', padding: '1.25rem 1.5rem', background: 'rgba(255,255,255,0.08)',
-                border: '2px solid rgba(255,255,255,0.1)', borderRadius: '16px', color: 'white',
-                fontSize: '1.1rem', outline: 'none'
-              }}
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={loading || !email}
-            style={{
-              width: '100%', 
-              background: loading || !email ? 'rgba(168,85,247,0.4)' : 'linear-gradient(45deg, #a855f7, #ec4899)',
-              color: 'white', padding: '1.5rem', borderRadius: '20px', border: 'none',
-              fontSize: '1.125rem', fontWeight: '700', cursor: loading ? 'not-allowed' : 'pointer',
-              boxShadow: '0 20px 40px rgba(168,85,247,0.4)'
-            }}
-          >
-            {loading ? (
-              <>
-                <span style={{ 
-                  display: 'inline-block', width: '1.5rem', height: '1.5rem', 
-                  border: '2px solid rgba(255,255,255,0.3)', borderTop: '2px solid white', 
-                  borderRadius: '50%', animation: 'spin 1s linear infinite', marginRight: '0.75rem' 
-                }} />
-                Signing in...
-              </>
-            ) : (
-              '🚀 Sign In with Gmail'
-            )}
+          <button type="submit" disabled={loading || !email} className="submit-btn">
+            {loading ? "Signing in..." : "Sign in with Gmail"}
           </button>
         </form>
 
-        <div style={{ 
-          textAlign: 'center', marginTop: '1.5rem', 
-          color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem' 
-        }}>
-          <p>Continue as guest → No likes saved</p>
-          <button
-            type="button"
-            onClick={onClose}
-            style={{
-              width: '100%', background: 'rgba(255,255,255,0.1)', color: 'white',
-              padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.2)',
-              fontSize: '1rem', cursor: 'pointer', marginTop: '0.5rem'
-            }}
-          >
+        {/* FOOTER */}
+        <div className="modal-footer">
+          <p>Continue without login</p>
+          <button onClick={onClose} className="skip-btn">
             Skip for now
           </button>
         </div>
+
       </div>
 
       <style>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
+
+/* 🔥 OVERLAY (PERFECT CENTER FIX) */
+.modal-overlay{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+display:flex;
+align-items:center;
+justify-content:center;
+background:rgba(0,0,0,0.75);
+backdrop-filter:blur(12px);
+z-index:9999;
+animation:fadeIn 0.3s ease;
+}
+
+/* 🔥 BOX */
+.modal-box{
+width:100%;
+max-width:420px;
+background:#111;
+border-radius:18px;
+padding:2.2rem;
+border:1px solid rgba(255,255,255,0.08);
+box-shadow:0 20px 60px rgba(0,0,0,0.6);
+animation:scaleIn 0.3s ease;
+}
+
+/* HEADER */
+.modal-header{
+text-align:center;
+margin-bottom:1.8rem;
+}
+
+.modal-header h2{
+color:#fff;
+font-size:1.8rem;
+margin-bottom:6px;
+}
+
+.modal-header p{
+color:rgba(255,255,255,0.6);
+font-size:0.95rem;
+}
+
+/* ERROR */
+.error-box{
+background:rgba(255,0,0,0.1);
+border:1px solid rgba(255,0,0,0.3);
+color:#ff6b6b;
+padding:10px;
+border-radius:8px;
+margin-bottom:1rem;
+text-align:center;
+}
+
+/* FORM */
+.form{
+display:flex;
+flex-direction:column;
+gap:1rem;
+}
+
+/* INPUT */
+.input-group label{
+color:#ccc;
+font-size:0.85rem;
+margin-bottom:4px;
+display:block;
+}
+
+.input-group input{
+width:100%;
+padding:12px;
+border-radius:10px;
+border:1px solid rgba(255,255,255,0.1);
+background:rgba(255,255,255,0.05);
+color:#fff;
+outline:none;
+transition:0.2s;
+}
+
+.input-group input:focus{
+border-color:#a855f7;
+box-shadow:0 0 10px rgba(168,85,247,0.4);
+}
+
+/* BUTTON */
+.submit-btn{
+margin-top:10px;
+padding:14px;
+border:none;
+border-radius:12px;
+font-weight:600;
+background:linear-gradient(45deg,#a855f7,#ec4899);
+color:#fff;
+cursor:pointer;
+transition:0.3s;
+}
+
+.submit-btn:hover{
+opacity:0.9;
+transform:translateY(-1px);
+}
+
+/* FOOTER */
+.modal-footer{
+text-align:center;
+margin-top:1.2rem;
+color:rgba(255,255,255,0.5);
+font-size:0.85rem;
+}
+
+.skip-btn{
+margin-top:8px;
+padding:10px;
+width:100%;
+background:rgba(255,255,255,0.08);
+border:1px solid rgba(255,255,255,0.15);
+color:white;
+border-radius:10px;
+cursor:pointer;
+}
+
+/* ANIMATIONS */
+@keyframes fadeIn{
+from{opacity:0;}
+to{opacity:1;}
+}
+
+@keyframes scaleIn{
+from{
+transform:scale(0.85);
+opacity:0;
+}
+to{
+transform:scale(1);
+opacity:1;
+}
+}
+
       `}</style>
+
     </div>
   );
 };

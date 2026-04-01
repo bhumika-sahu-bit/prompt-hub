@@ -46,49 +46,96 @@ const CreatePromptModal = ({ onClose, onSave }) => {
     return '';
   };
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   const validationError = validateForm();
+  //   if (validationError) {
+  //     setError(validationError);
+  //     return;
+  //   }
+
+  //   setLoading(true);
+  //   setError('');
+
+  //   try {
+  //     // ✅ Real API call to backend
+  //     const res = await fetch(`${backendURL}/api/prompts`, {
+  //       method: 'POST',
+  //       headers: { 
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify(formData)
+  //     });
+
+  //     if (!res.ok) {
+  //       throw new Error('Failed to save prompt');
+  //     }
+
+  //     const savedPrompt = await res.json();
+  //     console.log('✅ Saved to MongoDB:', savedPrompt._id);
+  //     onSave(savedPrompt);
+  //     onClose();
+      
+  //   } catch (error) {
+  //     console.error('❌ API Error:', error);
+  //     setError('Failed to save. Using local storage...');
+      
+  //     // ✅ Fallback - local save
+  //     setTimeout(() => {
+  //       onSave(formData);
+  //       onClose();
+  //     }, 1000);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const validationError = validateForm();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
+  e.preventDefault();
 
-    setLoading(true);
-    setError('');
+  if (loading) return;
 
-    try {
-      // ✅ Real API call to backend
-      const res = await fetch(`${backendURL}/api/prompts`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-      });
+  const validationError = validateForm();
+  if (validationError) {
+    setError(validationError);
+    return;
+  }
 
-      if (!res.ok) {
-        throw new Error('Failed to save prompt');
-      }
+  setLoading(true);
+  setError('');
 
-      const savedPrompt = await res.json();
-      console.log('✅ Saved to MongoDB:', savedPrompt._id);
-      onSave(savedPrompt);
-      onClose();
-      
-    } catch (error) {
-      console.error('❌ API Error:', error);
-      setError('Failed to save. Using local storage...');
-      
-      // ✅ Fallback - local save
-      setTimeout(() => {
-        onSave(formData);
-        onClose();
-      }, 1000);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // 🔥 UNIQUE ID (same request repeat hone se bachega)
+  const requestId = Date.now() + "_" + Math.random();
+
+  try {
+    const res = await fetch(`${backendURL}/api/prompts`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ...formData,
+        requestId // 🔥 send this
+      })
+    });
+
+    if (!res.ok) throw new Error('Failed to save');
+
+    const savedPrompt = await res.json();
+
+    console.log('✅ Saved:', savedPrompt._id);
+
+    onSave(savedPrompt);
+    onClose();
+
+  } catch (error) {
+    console.error('❌ API Error:', error);
+    setError('Failed to save');
+
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div style={{

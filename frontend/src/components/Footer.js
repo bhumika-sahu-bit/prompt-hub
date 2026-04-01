@@ -60,7 +60,7 @@ const Footer = () => {
       {/* Bottom */}
       <div style={styles.bottom}>
         <div>© {new Date().getFullYear()} PromptHub</div>
-        <div>Created by Lucky ❤️</div>
+        <div>Created by Bhumi ❤️</div>
       </div>
     </footer>
   );

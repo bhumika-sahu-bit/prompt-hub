@@ -1,7 +1,3 @@
-
-
-
-
 const express = require('express');
 const mongoose = require('mongoose');
 require('dotenv').config();
@@ -28,7 +24,7 @@ app.use(express.urlencoded({ limit: '100mb', extended: true }));
 console.log('🚀 Starting server...');
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI)
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/prompthub')
   .then(() => console.log('✅ MongoDB Connected'))
   .catch(err => console.log('❌ MongoDB Error:', err.message));
 
@@ -38,7 +34,11 @@ const promptSchema = new mongoose.Schema({
   prompt: { type: String, required: true },
   imageUrl: String,
   likes: { type: Number, default: 0 },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  requestId: {
+  type: String,
+  unique: true
+}
 });
 
 const userSchema = new mongoose.Schema({
@@ -56,30 +56,25 @@ const User = mongoose.model('User', userSchema);
 app.get('/api/prompts', async (req, res) => {
   try {
     const prompts = await Prompt.find().sort({ createdAt: -1 }).limit(20);
+    
     res.json(prompts);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// app.post('/api/prompts', async (req, res) => {
-//   try {
-//     console.log('📤 Saving:', req.body.title);
-//     const prompt = new Prompt(req.body);
-//     await prompt.save();
-//     console.log('✅ Saved:', prompt._id);
-//     res.status(201).json(prompt);
-//   } catch (error) {
-//     console.error('❌ Save error:', error);
-//     res.status(400).json({ error: error.message });
-//   }
-// });
 app.post('/api/prompts', async (req, res) => {
   try {
     console.log('📤 Saving:', req.body.title);
 
     const data = req.body;
     delete data._id;   // 🔥 important fix
+    const { requestId } = req.body; 
+     // 🔥 CHECK duplicate request
+    const existing = await Prompt.findOne({ requestId });
+    if (existing) {
+      return res.status(200).json(existing); // already saved
+    }
 
     const prompt = new Prompt(data);
     await prompt.save();
