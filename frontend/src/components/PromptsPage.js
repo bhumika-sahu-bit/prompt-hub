@@ -79,7 +79,7 @@
 
 import React, { useEffect, useState } from "react";
 import "./PromptsPage.css";
-import backendUrl from "../helper";
+import {backendUrl} from "../helper";
 
 const PromptsPage = () => {
 
