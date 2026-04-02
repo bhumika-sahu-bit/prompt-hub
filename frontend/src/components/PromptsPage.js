@@ -79,6 +79,7 @@
 
 import React, { useEffect, useState } from "react";
 import "./PromptsPage.css";
+import backendUrl from "../helper";
 
 const PromptsPage = () => {
 
@@ -87,7 +88,7 @@ const [search,setSearch] = useState("");
 
 useEffect(()=>{
 
-fetch("http://localhost:5000/api/prompts")
+fetch(`${backendUrl}/api/prompts`)
 .then(res=>res.json())
 .then(data=>setPrompts(data))
 
