@@ -52,4 +52,4 @@ Bhumika Sahu
 
 
 Full Stack Web Developer
-Passionate about building modern web applications and AI tools.
+Passionate about building modern full stack applications and AI tools.
